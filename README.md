@@ -1,30 +1,47 @@
 # Azure Intro: Create Subscription and First Resources
-Once my Azure subscription was setup and active, I opened Notepad to record all pertinent details regarding the subscription. This record became crucial throughout the lab activities as it kept track of configurations and settings.
+After initiating my Azure subscription and documenting the details, I launched a Windows 10 Pro VM named "windows-vm" and an Ubuntu VM named "linux-vm" in the "EAST US 2" region under a specific Resource Group and Virtual Network. I selected robust VM sizes, recorded configurations, and used secure credentials. Network Security Groups for both VMs were adjusted to allow all inbound traffic, and I managed the VMs' operational status based on daily lab activity needs to optimize resource use.
 
-Next, I created a Windows 10 Pro Virtual Machine and named it "windows-vm." I selected a cost-effective yet powerful size and secured it with a strong password. The VM was placed in the "EAST US 2" region, within a newly created Resource Group named "Leveld_ResourceGroup-Cyber-Lab," and it was connected to a Virtual Network that I named "Lab-VNet."
-
-I then set up another Virtual Machine running Ubuntu, which I named "linux-vm," ensuring it resided in the same region, Resource Group, and VNet as the Windows VM. I chose a VM size larger than B1s to prevent potential DDOS attacks that could disrupt the logging process, heeding the advice from an updated instructional video. For security measures, I set up authentication using a username and password.
-
-After the VMs were up and running, I configured the Network Security Groups for both VMs, setting the Layer 4 Firewall to allow all inbound traffic in preparation for the lab activities that would rely on these VMs.
-
-Lastly, I left the VMs running when there were additional lab tasks to be completed. If I finished for the day, I shut them down to conserve resources and manage costs.
-
-#### List of VM's below (including VM used to simulate attacker)
+### List of VM's below (including VM used to simulate attacker)
 ![Virtual Machines](https://github.com/alexmerelus/Azure-Resources/assets/138509128/5296f48c-8857-4d81-86ee-f5d9fc6dabad)
 
-I then remotely accessed the Windows VM, referred to as "windows-vm," and proceeded to disable the Windows Firewall for configuration purposes. Following that, I installed SQL Server Evaluation Edition from the link provided by Microsoft's evaluation center, using 'sa' as the default username and an easy to remember password. I then installed SQL Server Management Studio (SSMS) from the official Microsoft documentation page to manage the SQL Server.
+I accessed "windows-vm," turned off its firewall, and installed SQL Server Evaluation and SQL Server Management Studio, enabling event logging for monitoring. Testing confirmed that SQL logging was effective and capturing required data. Lastly, I successfully pinged and SSH'd into "linux-vm," ensuring network connectivity and remote access functionality. Next, I performed a ping test to the Ubuntu Virtual Machine, named "linux-vm," and successfully logged into it via SSH. This step was important to confirm network connectivity and the operational status of remote access.
 
-After the installations, I enabled logging for the SQL Server to ensure that events would be recorded in the Windows Event Viewer. I conducted tests on the SQL logging to verify that it was functioning correctly, ensuring that all necessary actions would be captured.
+### Resource Group List (Included group created for attacker simulation)
+![Resource Group List](https://github.com/alexmerelus/Azure-Resources/assets/138509128/15cb2ae2-1388-4fdc-b4be-0bae743c761c)
 
-Next, I performed a ping test to the Ubuntu Virtual Machine, named "linux-vm," and successfully logged into it via SSH. This step was important to confirm network connectivity and the operational status of remote access.
+As an administrator, I configured an additional Windows VM named "attack-vm" in a non-US region, set up its resource group and virtual network, and verified its functionality. Switching to an attacker role, I intentionally failed multiple remote desktop and SQL Server authentication attempts on "windows-vm," as well as SSH login attempts on "linux-vm," to generate erroneous logs. These actions were documented and monitored before I returned to my own system, concluding the simulated attack phase.
 
-#### Resource Group List (Included group created for attacker simulation)
-![Resource Group List](https://github.com/alexmerelus/Azure-Resources/assets/138509128/fa479fee-2fee-4b40-b86f-723293486932)
+### Microsfot Entra AD Users
+![Microsoft Entra AD Users](https://github.com/alexmerelus/Azure-Resources/assets/138509128/4be8409f-1164-4343-b691-870df97c5ae1)
 
-As an admin, I created another Windows VM situated in a region outside the US and named it "attack-vm." I designated the Resource Group as RG-Cyber-Lab-Attacker and named the VNet Lab-VNet-Attacker. After logging into the VM, I made sure it was functioning properly and retrieved the public IP address of "windows-vm" from the Azure Portal, saving it for subsequent steps.
+I conducted a cost analysis of my Azure subscription to ensure my spending was on track. I created a user in Azure Active Directory (aka AAD, now known as Microsoft Entra Identity Services), I created users with specific roles: "global_reader_alex" as a Tenant-Level Global Reader, "subcription_reader_isaiah" as a Subscription-Level Reader, and "rg_contributor_joseph" as a Resource Group Contributor. For each role, I logged into an incognito session to verify their respective permissions, ensuring that each user had appropriate access levels before closing the sessions.
 
-Shifting to an attacker's perspective, I generated some failed RDP logs against "windows-vm." From the "attack-vm," I tried to RDP into "windows-vm" using incorrect credentials and repeated this action two more times, each with different wrong usernames and passwords.
+### Log Analytics Agents add to Linux and Windows VM's
+![Log Analytics Agent on windows-vm](https://github.com/alexmerelus/Azure-Resources/assets/138509128/7585e4ad-3322-490a-9cf5-5359fa8c4215)
 
-Continuing in the attacker mode, I aimed to create failed MS SQL authentication logs against "windows-vm." Inside "attack-vm," I installed SSMS, if it wasn't already installed, and attempted to connect to the SQL Server on "windows-vm" using a bad password.
+I downloaded a significant Geo-Data file for the lab and then set up a Log Analytics Workspace named "LAW-Cyber-Lab-0x" to aggregate logs. After configuring Sentinel to integrate with the workspace, I created a geoip watchlist, specifying its details meticulously, and uploaded the data file into Sentinel. To confirm the success of the ingestion process, I ran a verification query in the Log Analytics Workspace.
+### Flow log created for Network Security Group
+![Created a flow log for NSG](https://github.com/alexmerelus/Azure-Resources/assets/138509128/a4f4aa0b-e639-4c21-9aa1-db827ac96a2b)
 
-I then generated some failed SSH logs against "linux-vm" by trying to SSH into it from "attack-vm" with the wrong credentials. After these attempts, I logged out of "attack-vm," returning to my own computer.
+I created an Azure Storage Account named "sacyberlab0x" in the same region as my VMs to store the NSG Flow Logs. Then, I enabled Flow logs for both Network Security Groups, directing them to our Log Analytics Workspace, and had to ensure the storage account was in the correct region. Afterward, I configured Data Collection Rules within our Log Analytics Workspace, turned on the VMs, set up Linux and Windows data sources, and applied Special Windows Event Data Collection from a GitHub repository.
+
+### SignIn Logs displayed from KQL Query to confirm logs of attacker account sign in attempts
+![SignIn Logs - KQL Query to confirm logs of attacker account sign in attempts](https://github.com/alexmerelus/Azure-Resources/assets/138509128/50853ee8-b319-4d4f-b33c-936f29c2966f)
+
+I then set up logging for Azure Active Directory, creating Diagnostic Settings to capture Audit Logs and Signin Logs. I verified the creation of "AuditLogs" and "SigninLogs" tables in the Log Analytics Workspace. I created a dummy user to log in once, using incognito mode, assigned them Global Administrator role, and then deleted them, observing the actions in the Audit Logs.
+
+I constructed a query in the Log Analytics Workspace to filter and display changes in user roles, especially focusing on Global Administrator assignments.
+Then, I switched to attacker mode, simulating a brute force attack against Azure Active Directory by producing multiple failed login attempts with an "attacker" user account.
+
+Returning to admin mode, I monitored the SigninLogs for these failed login attempts and built a query to extract detailed location information from the logs, helping to understand the source and method of the attack.
+
+### Key Vault Instance Created
+![10 - Created a Key Vault Instance](https://github.com/alexmerelus/Azure-Resources/assets/138509128/7fafa03f-2049-466b-9ddf-82dd6446833e)
+
+I configured logging for my Azure Storage account by enabling diagnostic settings to collect all logs and metrics, and directed them to my Log Analytics Workspace. Similarly, I set up logging for a newly created Key Vault instance, collecting the audit log and adding a secret named “Tenant-Global-Admin-Password” with a fictional password.
+
+After configuring these logs, I generated activity by accessing blobs in Azure Storage and adding a key to the Key Vault, then monitored these actions through the logs, which required some time to become visible. Anticipating the next lab, I turned on both the windows-vm and linux-vm,  leaving them running overnight to accumulate logs from any unauthorized access attempts.
+
+### Conclusion
+
+This concludes the resource setup for logging and monitoring. Part 2 will go into analyzing logs and creating Incident Response reports in Microsoft Sentinel (SIEM)
