@@ -1,4 +1,4 @@
-# Azure Intro: Create Subscription and First Resources
+# Part 1: Create Subscription and First Resources
 After initiating my Azure subscription and documenting the details, I launched a Windows 10 Pro VM named "windows-vm" and an Ubuntu VM named "linux-vm" in the "EAST US 2" region under a specific Resource Group and Virtual Network. I selected robust VM sizes, recorded configurations, and used secure credentials. Network Security Groups for both VMs were adjusted to allow all inbound traffic, and I managed the VMs' operational status based on daily lab activity needs to optimize resource use.
 
 ### List of VM's below (including VM used to simulate attacker)
